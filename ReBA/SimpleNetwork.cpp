@@ -71,17 +71,13 @@ int SimpleNetwork::loadNetworkFromFile(string filename, bool startFromZero)
 	cout<<whichSet<<"	degree:	";
 	if (infile.is_open())
 	{
-		int a,b,score;
+		int a = 0, b = 0;
 		int i=0,j=0;
 		while (!infile.eof() )
 		{
 			infile.getline (buffer,33);
-			sscanf(buffer,"%d %d %d",&a,&b,&score);
+			sscanf(buffer,"%d %d",&a,&b);
 			//cout<<a<<" "<<b<<"	"<<score<<" end"<<endl;
-			if (score<3)//&&sizeof(score)>0)
-			{
-				continue;
-			}
 			if (maxuser<a)
 			{
 				maxuser = a;
@@ -128,17 +124,13 @@ int SimpleNetwork::loadNetworkFromFile(string filename)
 	cout<<whichSet<<"	degree:	";
 	if (infile.is_open())
 	{
-		int a,b,score;
+		int a = 0, b = 0;
 		int i=0,j=0;
 		while (!infile.eof() )
 		{
 			infile.getline (buffer,33);
-			sscanf(buffer,"%d %d %d",&a,&b,&score);
+			sscanf(buffer,"%d %d",&a,&b);
 			//cout<<a<<" "<<b<<"	"<<score<<" end"<<endl;
-			if (score<3&&score>0)
-			{
-				continue;
-			}
 			if (maxuser<a)
 			{
 				maxuser = a;
@@ -186,6 +178,9 @@ int SimpleNetwork::loadNetworkFromFile(string filename)
 
 SimpleNetwork::SimpleNetwork(int a, int b)
 {
+	isStartFromZero = true;
+	isDirected = false;
+	degreeCounter = 0;
 	SimpleNetwork(true);
 	//addEdge(a,b);
 }
@@ -276,9 +271,9 @@ void SimpleNetwork::addEdgeToTempNetwork(int a, int b)
 
 void SimpleNetwork::removePoint(int p)
 {
-    for (vector<int>::iterator it = user_user_relation[p].begin(); it!= user_user_relation[p].end(); ++it)
+	for (vector<int>::iterator it = user_user_relation[p].begin(); it!= user_user_relation[p].end(); ++it)
 	{
-	    removeDirectedEdge(*it,p);
+		removeDirectedEdge(*it,p);
 	}
 	user_user_relation[p].clear();
 }
@@ -439,9 +434,9 @@ int SimpleNetwork::getUserMinDegree()
 	{
 		if (tempMindegree>user_user_relation[i].size() && user_user_relation[i].size()>0)
 		{
-            tempMindegree = user_user_relation[i].size();
-            if(tempMindegree == 1 || tempMindegree ==2)
-                return tempMindegree;
+			tempMindegree = user_user_relation[i].size();
+			if(tempMindegree == 1 || tempMindegree ==2)
+				return tempMindegree;
 		}
 	}
 	return tempMindegree;

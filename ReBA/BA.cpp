@@ -15,13 +15,16 @@ double node_node_importance[nodeNum][nodeNum];
 double degrrArray[nodeNum];
 double KShellDergeeNum[nodeNum];
 double no_discordant_or_concordant_paris = 0;
-double degreeDistrbution;
+double degreeDistrbution = 0;
 
-const int sowingTimes = 100;
+const int sowingTimes = 10;
 
 double probablity[nodeNum];
-double probs = 0.20;
+double probs = 0.2;
 double neibergProbs = 0.1;
+
+string polblogsfilepath = "F:/data/polblogs/polblogs.txt";
+typedef void (*func)();
 
 struct Ranker {
 	long int id;
@@ -33,12 +36,11 @@ struct Ranker {
 
 bool Greater(const Ranker & d1, const Ranker & d2) {
 	return d1.value < d2.value;
-}
-;
+};
+
 bool Smaller(const Ranker & d1, const Ranker & d2) {
 	return d1.value > d2.value;
-}
-;
+};
 
 void init() {
 	memset(nodeSequence, 0, sizeof(nodeSequence));
@@ -50,10 +52,19 @@ void init() {
 	sn.addEdge(0, 2);
 }
 
+void initFromFiles()
+{
+	memset(nodeSequence, 0, sizeof(nodeSequence));
+	memset(probablity, 0, sizeof(probablity));
+	memset(node_node_importance, 0, sizeof(node_node_importance));
+	memset(nodeSequenceWithSingleMethod,0,sizeof(nodeSequenceWithSingleMethod));
+	sn.loadNetworkFromFile(polblogsfilepath,true);
+}
+
 int* ReverseArray(int*orig, unsigned short int b) {
 	unsigned short int a = 0;
 	int swap;
-	for (a; a < --b; a++) //increment a and decrement b until they meet each other
+	for (; a < --b; a++) //increment a and decrement b until they meet each other
 			{
 		swap = orig[a];       //put what's in a into swap space
 		orig[a] = orig[b];    //put what's in b into a
@@ -64,8 +75,7 @@ int* ReverseArray(int*orig, unsigned short int b) {
 
 void genBA() {
 	init();
-	srand(0);        // init the random
-	//srand( time(NULL) );        // init the random
+	//srand(0);        // init the randomc
 	for (int i = 3; i < nodeNum; i++) {
 		//New node have to connet at least one existed node
 		int counter = 0;
@@ -86,7 +96,7 @@ void genBA() {
 	}
 }
 
-void writefile(string filename, string content) {
+void writeResultfile(string filename, string content) {
 	ofstream resultfile(filename, ios::app);           //打开文件用于写,若文件不存在就创建它
 	if (!resultfile)
 		cout << "open file:" << filename << "failure!";            //打开文件失败则结束运行
@@ -109,7 +119,6 @@ void removeAndWritefile(string filename, string content) {
 
 //return inflected numbers
 int sowing(int startNode, double p) {
-	srand(time(NULL));        // init the random
 	double immunited[nodeNum];
 	int tempNode = 0, tempStartNode = 0;
 	memset(immunited, 0, sizeof(immunited));
@@ -129,6 +138,7 @@ int sowing(int startNode, double p) {
 					continue;
 				}
 				double randNumber = (rand() % 100) / 100.0;
+				//cout <<"randNumber is : "<< randNumber << endl;
 				if (randNumber < p) {
 					tempInflectedList.push_back(tempNode);
 					immunited[tempNode] = 1;
@@ -157,7 +167,6 @@ int sowing(int startNode, double p) {
 //Gossip: Identifying Central Individuals in a Social Network
 
 int sowingByGrasipModel(int startNode, double p) {
-	srand(time(NULL));        // init the random
 	double immunited[nodeNum];
 	int tempNode = 0, tempStartNode = 0;
 	memset(immunited, 0, sizeof(immunited));
@@ -320,17 +329,19 @@ double KendallTau(double arry[], int len) {
 	//cout<<"8443	"<< arry[8443]<<endl;
 	//order_paris = getNoOrderPairs(arry,len);
 	double sum = 0;
-	double tempArray[len];
-	memcpy(tempArray, arry, sizeof(tempArray));
-	no_discordant_or_concordant_paris = getNoOrderPairs(tempArray, len);
+	double *tempArray = new double[len];
+	//double tempArray[len];
+	memcpy(tempArray, arry, len*sizeof(*tempArray));
 	for (int i = 0; i < len; i++) {
 		//nodeSequenceWithSingleMethod[i] = nodeDrgeeNum[i];
 		if (tempArray[i] != arry[i]) {
 			cout <<i<<"	"<< tempArray[i] << "	123 " << arry[i] << endl;
 		}
 	}
+	no_discordant_or_concordant_paris = getNoOrderPairs(tempArray, len);
 	//cout<<"len is: "<<len<<endl;
 	double counter = InversePairs(tempArray, len);
+	delete[] tempArray;
 	//printArray(tempArray,len);
 	sum = (len - 1) * 1.0 * len / 2;
 
@@ -482,11 +493,12 @@ void getSequencebyDegree() {
 void getSequencebySowing() {
 	double nodeInflectEfeetionScore[nodeNum];
 	memset(nodeInflectEfeetionScore, 0, sizeof(nodeInflectEfeetionScore));
-	int inflectedNodes = 0;
+	double inflectedNodes = 0;
 	for (int j = 0; j < sowingTimes; j++) {
 		for (int i = 0; i < nodeNum; i++) {
 			double infe = sowing(i, probs);
 			nodeInflectEfeetionScore[i] += infe;
+			//cout << i << "\t" << infe << endl;
 			inflectedNodes += infe;
 			//cout<<nodeInflectEfeetionScore[i]<<endl;
 		}
@@ -498,7 +510,7 @@ void getSequencebySowing() {
 		//cout<<i<<"	"<<sn.user_user_relation[i].size()<<"	"<<nodeInflectEfeetionScore[i]<<endl;
 	}
 
-	cout<<"probs:   "<<probs<<" maxdegree:  "<<sn.getUserMaxDegree()<<" inflected:  "<<inflectedNodes<<" and average coverd nodes: "<<inflectedNodes*1.0/nodeNum/sowingTimes<<endl;
+	cout<<"probs:   "<<probs<<" maxdegree:  "<<sn.getUserMaxDegree()<<" inflected:  "<<inflectedNodes<<" and average coverd nodes: "<<inflectedNodes/nodeNum/sowingTimes<<endl;
 
 }
 
@@ -553,7 +565,7 @@ void getSequencebyGasip() {
 			heardGasipTimesFromNode[i] = heardGasipTimesFromNode[i]
 					+ node_node_importance[i][j]/(sowingTimes*1.0);
 		}
-		cout<<"node "<<i<<"	cover	"<<heardGasipTimesFromNode[i]<<endl;
+		//cout<<"node "<<i<<"	cover	"<<heardGasipTimesFromNode[i]<<endl;
 	}
 
 	memcpy(nodeSequenceWithSingleMethod, heardGasipTimesFromNode,
@@ -710,6 +722,7 @@ void hybird(double lamada) {
 	double dergeeArray[nodeNum];
 	double hyBirdDergeeNum[nodeNum];
 	memset(hyBirdDergeeNum, 0, sizeof(hyBirdDergeeNum));
+	memset(dergeeArray, 0, sizeof(dergeeArray));
 	//memset(KShellDergeeNum,0,sizeof(KShellDergeeNum));
 	//memset(nodeSequenceWithSingleMethod,0,sizeof(nodeSequenceWithSingleMethod));
 	//memset(degreeBasedSequence,0,sizeof(degreeBasedSequence));
@@ -721,23 +734,75 @@ void hybird(double lamada) {
 	for (int i = 0; i < nodeNum; i++) {
 		hyBirdDergeeNum[i] = pow(nodeSequenceWithSingleMethod[i] * 1.0, lamada)
 				* pow(dergeeArray[i] * 1.0, (1 - lamada));
-		cout << lamada << "	"
+		/*cout << lamada << "	"
 				<< pow(nodeSequenceWithSingleMethod[i] * 1.0, lamada) << "\t"
 				<< pow(dergeeArray[i] * 1.0, (1 - lamada)) << endl;
 		sssss << nodeSequenceWithSingleMethod[i] << "\t" << dergeeArray[i]
-				<< "\t" << hyBirdDergeeNum[i];
-		writefile("degree.txt", sssss.str());
-		sssss.str("");
+				<< "\t" << hyBirdDergeeNum[i];*/
+		//writeResultfile("degree.txt", sssss.str());
+		sssss.str(std::string());
+		sssss.clear();
 	}
 	//memcpy(nodeSequenceWithSingleMethod,KShellDergeeNum,sizeof(nodeSequenceWithSingleMethod));
 	memcpy(nodeSequence, hyBirdDergeeNum, sizeof(nodeSequence));
 
 }
 
-int main() {
-	//testKendallTau123();
-	// setToInitialToSowAgain();
+void hybird(double lamada, func myfunc) {
+	double dergeeArray[nodeNum];
+	double hyBirdDergeeNum[nodeNum];
+	memset(hyBirdDergeeNum, 0, sizeof(hyBirdDergeeNum));
+	memset(dergeeArray, 0, sizeof(dergeeArray));
+	//memset(KShellDergeeNum,0,sizeof(KShellDergeeNum));
+	//memset(nodeSequenceWithSingleMethod,0,sizeof(nodeSequenceWithSingleMethod));
+	//memset(degreeBasedSequence,0,sizeof(degreeBasedSequence));
+	for (int i = 0; i < nodeNum; i++) {
+		dergeeArray[i] = sn.user_user_relation[i].size();
+	}
+
+	myfunc();
+
+	stringstream sssss;
+	for (int i = 0; i < nodeNum; i++) {
+		hyBirdDergeeNum[i] = pow(nodeSequenceWithSingleMethod[i] * 1.0, lamada)
+			* pow(dergeeArray[i] * 1.0, (1 - lamada));
+		/*cout << lamada << "	"
+		<< pow(nodeSequenceWithSingleMethod[i] * 1.0, lamada) << "\t"
+		<< pow(dergeeArray[i] * 1.0, (1 - lamada)) << endl;
+		sssss << nodeSequenceWithSingleMethod[i] << "\t" << dergeeArray[i]
+		<< "\t" << hyBirdDergeeNum[i];*/
+		//writeResultfile("degree.txt", sssss.str());
+		sssss.str(std::string());
+		sssss.clear();
+	}
+	//memcpy(nodeSequenceWithSingleMethod,KShellDergeeNum,sizeof(nodeSequenceWithSingleMethod));
+	memcpy(nodeSequence, hyBirdDergeeNum, sizeof(nodeSequence));
+
+}
+
+int testSpreading(){
+	//initFromFiles();
 	genBA();
+	stringstream ss;
+	for (double lamada = 0.1;lamada<1;lamada+=0.2)
+	{
+		neibergProbs = lamada;
+		//getSequencebyGasip();
+		getSequencebySowing();
+		//getSequencebyDegreeWithNeibergs();
+		//ss<<lamada<<"\t"<<KendallTau(nodeSequence,nodeNum)<<"\r\n";
+		//ss<<lamada<<"\t"<<simpleKendallTau(nodeSequence,nodeNum)<<"\r\n";
+	}
+	cout<<ss.str()<<endl;
+	return 0;
+}
+
+int main() {
+	srand(time(NULL));        // init the random
+	//testSpreading();
+	//testKendallTau123();
+	//setToInitialToSowAgain();
+	//genBA();
 	//getSequencebyDegree();
 	//getSequencebyGasip();
 	//getSequencebySowing();
@@ -753,21 +818,25 @@ int main() {
 	//cout<<sn.countDegree()<<endl;
 //	getSequencebyDegree();//0.136893
 //
-//    stringstream ss;
-//	for (double lamada = 0.1;lamada<1;lamada+=0.1)
-//	{
-//		genBA();
-//		neibergProbs = lamada;
-//		kShell();
-//		//getSequencebyGasip();
-//		hybird(lamada);
-//        //getSequencebyDegreeWithNeibergs();
-//		ss<<lamada<<"\t"<<KendallTau(nodeSequence,nodeNum)<<"\r\n";
-//		//ss<<lamada<<"\t"<<simpleKendallTau(nodeSequence,nodeNum)<<"\r\n";
-//	}
-//    cout<<ss.str()<<endl;
-//    removeAndWritefile("answer.txt",ss.str());
-//    ss.str("");
+//	kShell();
+	stringstream ss;
+	genBA();
+	for (double lamada = 0.25;lamada<0.35;lamada+=0.01)
+	{
+		//initFromFiles();
+		neibergProbs = lamada;
+		//getSequencebySowing();
+		//getSequencebyDegreeWithNeibergs();
+		//getSequencebyGasip();
+		hybird(lamada, getSequencebyGasip);
+		double kt = KendallTau(nodeSequence, nodeNum);
+		cout << lamada << "\t" << kt << endl;
+		//cout << lamada << "\t" << KendallTau(nodeSequenceWithSingleMethod, nodeNum) << "\r\n";
+		ss << lamada << "\t" << kt << "\r\n";
+	}
+	cout<<ss.str()<<endl;
+	removeAndWritefile("answer.txt",ss.str());
+	ss.str("");
 
 //	for(double p = 0; p<0.1; p+=0.01)
 //	{
@@ -778,15 +847,15 @@ int main() {
 //		cout<<neibergProbs<<"\t"<<KendallTau(nodeSequenceWithSingleMethod,nodeNum)<<endl;//152925//154061_0.383139
 //	}
 
-	for(double p = 0; p<1000; p+=1)
-	{
-		//probs = p;
-		//neibergProbs = p;
-		getSequencebySowing();//147200_0.42
-		//getSequencebyGasip();//99765_0.60032
-		//getSequencebyDegreeWithNeibergs();
-		cout<<KendallTau(nodeSequenceWithSingleMethod,nodeNum)<<"  "<<p<<endl;//107701_0.5527
-	}
+//	for(double p = 0; p<10; p+=1)
+//	{
+//		//probs = p;
+//		//neibergProbs = p;
+//		getSequencebySowing();//147200_0.42
+//		//getSequencebyGasip();//99765_0.60032
+//		//getSequencebyDegreeWithNeibergs();
+//		cout<<KendallTau(nodeSequenceWithSingleMethod,nodeNum)<<"  "<<p<<endl;//107701_0.5527
+//	}
 
 	//getSequencebySowing();
 	//KendallTau(nodeSequenceWithSingleMethod,sizeof(nodeSequenceWithSingleMethod)/sizeof(int));//329749
