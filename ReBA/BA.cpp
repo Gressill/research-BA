@@ -293,6 +293,7 @@ double slowKendallTau(double arry[], int len) {
 }
 //http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient
 double getNoOrderPairs(double aray[], int len) {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double paris = 0.0;
 	//int degreesDistribution[len];
 	map<double, int> degreesDistribution;
@@ -322,6 +323,7 @@ double getNoOrderPairs(double aray[], int len) {
 }
 
 double KendallTau(double arry[], int len) {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	//int arry[]={7,5,6,4};
 	//int arry[]={1,3,7,8,2,4,6,5};
 	//int len=sizeof(arry)/sizeof(int);
@@ -474,7 +476,8 @@ void setToInitialToSowAgain() {
 	//    Graph->AddNode(5);
 	//    Graph->AddEdge(1,5);
 }
-void getSequencebyDegree() {
+double* getSequencebyDegree(double* inputArry) {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double nodeDrgeeNum[nodeNum];
 	memset(nodeDrgeeNum, 0, sizeof(nodeDrgeeNum));
 	memset(nodeSequenceWithSingleMethod, 0,
@@ -485,12 +488,15 @@ void getSequencebyDegree() {
 		nodeDrgeeNum[i] = sn.user_user_relation[i].size();
 		//degrrArray[i] = nodeDrgeeNum[i];
 		nodeSequenceWithSingleMethod[i] = nodeDrgeeNum[i];
+		inputArry[i] = nodeDrgeeNum[i];
 	}
+	return inputArry;
 	//printArray(degreeBasedSequence,nodeNum);
 	//cout<<"GetKendallTauDistance is: "<<GetKendallTauDistance(degrrArray,degreeBasedSequence,nodeNum)<<endl;
 }
 
 void getSequencebySowing() {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double nodeInflectEfeetionScore[nodeNum];
 	memset(nodeInflectEfeetionScore, 0, sizeof(nodeInflectEfeetionScore));
 	double inflectedNodes = 0;
@@ -515,6 +521,7 @@ void getSequencebySowing() {
 }
 
 void getSequencebyDegreeWithNeibergs() {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double nodeDrgeeNum[nodeNum];
 	memset(nodeDrgeeNum, 0, sizeof(nodeDrgeeNum));
 	memset(nodeSequenceWithSingleMethod, 0,
@@ -549,6 +556,7 @@ void getSequencebyDegreeWithNeibergs() {
 }
 
 void getSequencebyGasip() {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double heardGasipTimesFromNode[nodeNum];
 	memset(heardGasipTimesFromNode, 0, sizeof(heardGasipTimesFromNode));
 
@@ -601,6 +609,7 @@ void getSequencebyGasip() {
 }
 
 void getSequencebyGasipDegreeMoreThanD(int d) {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double heardGasipTimesFromNode[nodeNum];
 	memset(heardGasipTimesFromNode, 0, sizeof(heardGasipTimesFromNode));
 	int inflectedNodes = 0;
@@ -647,10 +656,12 @@ void getSequencebyGasipDegreeMoreThanD(int d) {
 
 //只统计度大于1的点的kintal
 void getRidofDegreeLessThenOne() {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 
 }
 
 void getDegreeDistribution() {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	int degrees[nodeNum];
 	int degreesDistribution[nodeNum];
 	memset(degrees, 0, sizeof(degrees));
@@ -670,6 +681,7 @@ void getDegreeDistribution() {
 }
 
 void kShell() {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double nodeDergeeNum[nodeNum];
 	memset(nodeDergeeNum, 0, sizeof(nodeDergeeNum));
 	memset(KShellDergeeNum, 0, sizeof(KShellDergeeNum));
@@ -719,6 +731,7 @@ void kShell() {
 }
 
 void hybird(double lamada) {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double dergeeArray[nodeNum];
 	double hyBirdDergeeNum[nodeNum];
 	memset(hyBirdDergeeNum, 0, sizeof(hyBirdDergeeNum));
@@ -749,6 +762,7 @@ void hybird(double lamada) {
 }
 
 void hybird(double lamada, func myfunc) {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	double dergeeArray[nodeNum];
 	double hyBirdDergeeNum[nodeNum];
 	memset(hyBirdDergeeNum, 0, sizeof(hyBirdDergeeNum));
@@ -780,7 +794,43 @@ void hybird(double lamada, func myfunc) {
 
 }
 
+void hybird(double lamada, func funcOne, func funcTwo) {
+	cout << "Now we are at: " << __FUNCTION__ << endl;
+	double *sequenceOne = new double[nodeNum];
+	double *sequenceTwo = new double[nodeNum];
+	double dergeeArray[nodeNum];
+	double hyBirdDergeeNum[nodeNum];
+	memset(hyBirdDergeeNum, 0, sizeof(hyBirdDergeeNum));
+	memset(dergeeArray, 0, sizeof(dergeeArray));
+	//memset(degreeBasedSequence,0,sizeof(degreeBasedSequence));
+	for (int i = 0; i < nodeNum; i++) {
+		dergeeArray[i] = sn.user_user_relation[i].size();
+	}
+
+	myfunc();
+
+	stringstream sssss;
+	for (int i = 0; i < nodeNum; i++) {
+		hyBirdDergeeNum[i] = pow(nodeSequenceWithSingleMethod[i] * 1.0, lamada)
+			* pow(dergeeArray[i] * 1.0, (1 - lamada));
+		/*cout << lamada << "	"
+		<< pow(nodeSequenceWithSingleMethod[i] * 1.0, lamada) << "\t"
+		<< pow(dergeeArray[i] * 1.0, (1 - lamada)) << endl;
+		sssss << nodeSequenceWithSingleMethod[i] << "\t" << dergeeArray[i]
+		<< "\t" << hyBirdDergeeNum[i];*/
+		//writeResultfile("degree.txt", sssss.str());
+		sssss.str(std::string());
+		sssss.clear();
+	}
+	//memcpy(nodeSequenceWithSingleMethod,KShellDergeeNum,sizeof(nodeSequenceWithSingleMethod));
+	memcpy(nodeSequence, hyBirdDergeeNum, sizeof(nodeSequence));
+	delete[] sequenceOne;
+	delete[] sequenceTwo;
+
+}
+
 int testSpreading(){
+	cout << "Now we are at: " << __FUNCTION__ << endl;
 	//initFromFiles();
 	genBA();
 	stringstream ss;
@@ -821,15 +871,16 @@ int main() {
 //	kShell();
 	stringstream ss;
 	genBA();
-	for (double lamada = 0.25;lamada<0.35;lamada+=0.01)
+	for (double lamada = 0.001;lamada<0.1;lamada+=0.001)
 	{
 		//initFromFiles();
-		neibergProbs = lamada;
+		neibergProbs = 0.01;
 		//getSequencebySowing();
-		//getSequencebyDegreeWithNeibergs();
+		getSequencebyDegreeWithNeibergs();
 		//getSequencebyGasip();
 		hybird(lamada, getSequencebyGasip);
 		double kt = KendallTau(nodeSequence, nodeNum);
+		//double kt = KendallTau(nodeSequenceWithSingleMethod, nodeNum);
 		cout << lamada << "\t" << kt << endl;
 		//cout << lamada << "\t" << KendallTau(nodeSequenceWithSingleMethod, nodeNum) << "\r\n";
 		ss << lamada << "\t" << kt << "\r\n";
